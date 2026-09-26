@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!-- saved from url=(0100)http://localhost:63342/untitled/index.html?_ijt=76t45ql3fjbscjc1rug7heb29o&_ij_reload=RELOAD_ON_SAVE -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+  <title>Reaction Test</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      background: red;
+      color: white;
+      text-align: center;
+    }
+
+    button {
+      font-size: 25px;
+      padding: 15px 30px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body style="background: red;">
+
+<div>
+  <h1 id="message">REACTION TEST</h1>
+  <button id="start" style="display: inline-block;">START</button>
+</div>
+
+<script>
+  let startTime;
+  let waiting = false;
+  let playing = false;
+
+  const startButton = document.getElementById("start");
+  const message = document.getElementById("message");
+
+  startButton.onclick = function(event) {
+    event.stopPropagation();
+
+    startButton.style.display = "none";
+    message.textContent = "WAIT...";
+    document.body.style.background = "red";
+
+    waiting = true;
+    playing = true;
+
+    let randomTime = Math.random() * 3000 + 1000;
+
+    setTimeout(function() {
+      document.body.style.background = "green";
+      message.textContent = "CLICK!";
+      startTime = Date.now();
+      waiting = false;
+    }, randomTime);
+  };
+
+  document.body.onclick = function() {
+    if (!playing) return;
+
+    if (waiting) {
+      message.textContent = "TOO EARLY! 😭";
+      reset();
+      return;
+    }
+
+    let reactionTime = Date.now() - startTime;
+
+    message.textContent = reactionTime + " ms";
+    reset();
+  };
+
+  function reset() {
+    playing = false;
+    waiting = false;
+
+    setTimeout(function() {
+      startButton.style.display = "inline-block";
+      message.textContent = "REACTION TEST";
+      document.body.style.background = "red";
+    }, 1500);
+  }
+</script>
+
+
+<script>
+(function() {
+  var ws = new WebSocket('ws://' + window.location.host + 
+             '/jb-server-page?reloadMode=RELOAD_ON_SAVE&'+
+             'referrer=' + encodeURIComponent(window.location.pathname));
+  ws.onmessage = function (msg) {
+      if (msg.data === 'reload') {
+          window.location.reload();
+      }
+      if (msg.data.startsWith('update-css ')) {
+          var messageId = msg.data.substring(11);
+          var links = document.getElementsByTagName('link');
+          for (var i = 0; i < links.length; i++) {
+              var link = links[i];
+              if (link.rel !== 'stylesheet') continue;
+              var clonedLink = link.cloneNode(true);
+              var newHref = link.href.replace(/(&|\?)jbUpdateLinksId=\d+/, "$1jbUpdateLinksId=" + messageId);
+              if (newHref !== link.href) {
+                clonedLink.href = newHref;
+              }
+              else {
+                var indexOfQuest = newHref.indexOf('?');
+                if (indexOfQuest >= 0) {
+                  // to support ?foo#hash 
+                  clonedLink.href = newHref.substring(0, indexOfQuest + 1) + 'jbUpdateLinksId=' + messageId + '&' + 
+                                    newHref.substring(indexOfQuest + 1);
+                }
+                else {
+                  clonedLink.href += '?' + 'jbUpdateLinksId=' + messageId;
+                }
+              }
+              link.replaceWith(clonedLink);
+          }
+      }
+  };
+})();
+</script></body></html>
